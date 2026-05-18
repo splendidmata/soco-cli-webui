@@ -14,6 +14,19 @@ LOG_DIR="/var/log/sonoradio"
 PORT=${1:-$DEFAULT_PORT}
 USER=$(whoami)
 
+# 自动检测 CPU 核心数并计算 Gunicorn worker 数量
+# 公式: workers = (CPU核心数 * 2) + 1
+CPU_CORES=$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)
+GUNICORN_WORKERS=$((CPU_CORES * 2 + 1))
+
+# 限制最小和最大 worker 数量
+if [ $GUNICORN_WORKERS -lt 3 ]; then
+    GUNICORN_WORKERS=3
+fi
+if [ $GUNICORN_WORKERS -gt 16 ]; then
+    GUNICORN_WORKERS=16
+fi
+
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -148,7 +161,7 @@ User=$USER
 WorkingDirectory=$INSTALL_DIR
 Environment="PATH=$INSTALL_DIR/venv/bin"
 Environment="PORT=$PORT"
-ExecStart=$INSTALL_DIR/venv/bin/gunicorn -w 4 -b 0.0.0.0:$PORT --access-logfile $LOG_DIR/access.log --error-logfile $LOG_DIR/error.log web_ui:app
+ExecStart=$INSTALL_DIR/venv/bin/gunicorn -w $GUNICORN_WORKERS -b 0.0.0.0:$PORT --access-logfile $LOG_DIR/access.log --error-logfile $LOG_DIR/error.log web_ui:app
 ExecReload=/bin/kill -s HUP \$MAINPID
 KillMode=mixed
 TimeoutStopSec=5
@@ -294,6 +307,8 @@ main() {
     echo "配置信息:"
     echo "  - 安装目录: $INSTALL_DIR"
     echo "  - 服务端口: $PORT"
+    echo "  - CPU 核心数: $CPU_CORES"
+    echo "  - Gunicorn Workers: $GUNICORN_WORKERS"
     echo ""
 
     check_root
