@@ -64,18 +64,18 @@ install_dependencies() {
     case $OS in
         openwrt)
             opkg update
-            opkg install python3 python3-venv git git-http avahi-daemon
+            opkg install python3 python3-venv git git-http avahi-daemon logrotate
             ;;
         debian|armbian)
             export DEBIAN_FRONTEND=noninteractive
             apt-get update
-            apt-get install -y python3 python3-venv git avahi-daemon avahi-utils
+            apt-get install -y python3 python3-venv git avahi-daemon avahi-utils logrotate
             ;;
         redhat)
-            yum install -y python3 python3-pip git avahi-tools
+            yum install -y python3 python3-pip git avahi-tools logrotate
             ;;
         *)
-            echo_warn "未知的操作系统，请手动安装依赖: python3, python3-venv, git, avahi-daemon"
+            echo_warn "未知的操作系统，请手动安装依赖: python3, python3-venv, git, avahi-daemon, logrotate"
             ;;
     esac
 }
@@ -196,6 +196,33 @@ EOF
     echo "已创建 mDNS 服务文件: $AVAHI_DIR/sonoradio.service"
 }
 
+# 创建日志轮转配置
+create_logrotate_config() {
+    echo_step "配置日志轮转..."
+
+    cat > /tmp/sonoradio << EOF
+$LOG_DIR/*.log {
+    daily
+    missingok
+    rotate 7
+    compress
+    delaycompress
+    notifempty
+    create 644 $USER $USER
+    sharedscripts
+    postrotate
+        systemctl reload sonoradio > /dev/null 2>&1 || true
+    endscript
+}
+EOF
+
+    cp /tmp/sonoradio /etc/logrotate.d/sonoradio
+    chmod 644 /etc/logrotate.d/sonoradio
+    rm /tmp/sonoradio
+
+    echo "已创建日志轮转配置: /etc/logrotate.d/sonoradio"
+}
+
 # 启动服务
 start_services() {
     echo_step "启动服务..."
@@ -277,6 +304,7 @@ main() {
     setup_virtualenv
     create_systemd_service
     create_avahi_service
+    create_logrotate_config
     start_services
     verify_installation
 }
