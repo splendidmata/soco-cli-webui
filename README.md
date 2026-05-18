@@ -112,10 +112,8 @@ venv\Scripts\activate
 # 4. 安装依赖
 pip install -r requirements.txt
 
-# 5. 创建数据库目录
-mkdir -p db
-
-# 6. 启动服务
+# 5. 启动服务
+# 程序会自动创建数据库目录并初始化默认电台
 python web_ui.py
 ```
 
