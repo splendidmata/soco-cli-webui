@@ -72,7 +72,7 @@ docker run -d \
   --network host \
   --restart unless-stopped \
   -v /opt/sonoradio/db:/app/db \
-  splendidmata/sonoradio
+  splendidmata/sonoradio:master
 ```
 
 **macOS / Windows（桥接模式）：**
