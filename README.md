@@ -73,6 +73,9 @@ docker run -d \
   --restart unless-stopped \
   -v /opt/sonoradio/db:/app/db \
   splendidmata/sonoradio:master
+
+# 访问192.168.xx.xx:5000
+
 ```
 
 **macOS / Windows（桥接模式）：**
