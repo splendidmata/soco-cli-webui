@@ -93,7 +93,55 @@ docker run -d \
 - pip 包管理工具
 - 局域网内有 Sonos 扬声器
 
-**安装步骤：**
+#### ⚡ 一键安装脚本（推荐）
+
+项目提供了一键安装脚本，自动完成所有配置，包括系统服务、开机自启和 mDNS：
+
+```bash
+# 下载安装脚本
+curl -fsSL https://raw.githubusercontent.com/splendidmata/soco-cli-webui/master/install.sh -o install.sh
+chmod +x install.sh
+
+# 运行安装脚本（使用默认端口 8888）
+sudo ./install.sh
+
+# 或者指定自定义端口
+sudo ./install.sh 8080
+```
+
+**一键脚本功能：**
+- ✅ 自动检测操作系统（Debian/Ubuntu/OpenWRT/Armbian）
+- ✅ 安装系统依赖（Python3、Git、Avahi）
+- ✅ 克隆/更新项目到 `/opt/sonoradio`
+- ✅ 创建 Python 虚拟环境并安装依赖
+- ✅ 配置 systemd 系统服务（开机自启）
+- ✅ 配置 avahi-daemon mDNS 服务
+- ✅ 启动服务并设置开机自启
+
+**安装后访问：**
+```
+http://<主机IP>:8888
+http://sonoradio.local:8888
+```
+
+**服务管理命令：**
+```bash
+# 查看状态
+sudo systemctl status sonoradio
+
+# 查看日志
+sudo journalctl -u sonoradio -f
+
+# 重启服务
+sudo systemctl restart sonoradio
+
+# 停止服务
+sudo systemctl stop sonoradio
+```
+
+#### 手动安装步骤
+
+如果不想使用一键脚本，可以手动安装：
 
 ```bash
 # 1. 克隆项目
