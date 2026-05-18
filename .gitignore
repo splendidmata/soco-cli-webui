@@ -1,0 +1,16 @@
+/venv/
+.idea
+/deploy.sh
+__pycache__/
+/build/
+/dist/
+/soco_cli.egg-info/
+*.pyc
+/README.md.orig.*
+/README.md.toc.*
+/exploration
+/audio_files
+/examples
+/.mypy_cache
+/.pytest_cache
+/db/radio_stations.db

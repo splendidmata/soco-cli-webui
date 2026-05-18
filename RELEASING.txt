@@ -1,0 +1,22 @@
+0. Start on branch 'next_version'; when changes are ready to be released:
+   Update the CHANGELOG (if required)
+   make format  (if required)
+   make toc  (if required)
+   git commit -a -m "Ready for release"  (if required)
+   git checkout master
+   git merge next_version
+
+1. Check __version__ in soco_cli/__init__.py
+2. Commit: git commit -a -m "Version X.Y.Z"
+3. Push: git push
+4. Tag the commit: git tag -a vX.Y.Z -m "Version X.Y.Z"
+5. Push the commit tags: git push --tags
+6. PyPi push: make pypi_upload
+
+7. git checkout next_version
+   git merge master
+   git push
+   Increment __version__ in __init__.py
+   Set up CHANGELOG.txt for next version
+   git commit -a -m "Set up for vX.Y.Z development"
+   start next set of changes

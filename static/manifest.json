@@ -1,0 +1,22 @@
+{
+    "name": "SonoRadio",
+    "short_name": "SonoRadio",
+    "description": "Sonos Speaker Control Web UI",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1a1a2e",
+    "theme_color": "#1a1a2e",
+    "icons": [
+        {
+            "src": "/static/icon-180.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        },
+        {
+            "src": "/static/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

@@ -1,0 +1,392 @@
+v0.4.86   - Add 'async_' prefix support for HTTP API Server macros
+          - Allow multiple sharelinks in a single 'add_sharelink_to_queue' action
+          - Allow multiple sharelinks in a single 'play_sharelink' action;
+            add optional 'position' argument
+v0.4.85   - Add 'alarms_spec' and 'alarms_spec_zone' actions to list alarms in
+            alarm spec format for easy copy/paste into 'modify_alarm'/'add_alarm'
+v0.4.84   - Interrupt command sequence on break (fixes #35)
+          - Add support for adding & removing surround sound satellite speakers
+          - Add requirement for SoCo v0.31.0
+v0.4.83   - Fix tab completion in interactive mode for Python 3.10+
+          - Fix bug when checking for .soco-cli directory
+v0.4.82   - Add 'redirect_io' boolean option to API 'run_command()' to
+            prevent capture of stdout and stderr (fixes #85)
+v0.4.81   - Eliminate/alias inconsistent use of underscore in command line
+            option names (#84)
+v0.4.80   - Minor fixes & bump SoCo version requirement
+v0.4.79   - Add 'list_audio_files' path to HTTP API Server
+v0.4.78   - Allow pass-through of '_end_on_pause' via HTTP API
+          - HTTP API server: new 'async' operation will cancel an existing,
+            running one
+v0.4.77   - Changes to 'play_file' speaker reachability fallback logic
+          - Add support for HTTP API Server 'async_' actions
+v0.4.76   - Add 'play_sharelink' action
+v0.4.75   - Use dual-stage approach for determining 'play_file' server IP address
+v0.4.74   - Determine HTTP server IP to use for 'play_file' using target speaker
+            reachability
+v0.4.73   - Remove dependency on distutils.version.StrictVersion for Python 3.12
+            compatibility
+v0.4.72   - Workaround for https://github.com/SoCo/SoCo/issues/950
+v0.4.71   - Fix for https://github.com/avantrec/soco-cli/issues/64
+v0.4.70   - Add 'is_not_coordinator' conditional action modifier
+v0.4.69   - Add 'strict' option for all music library searches
+          - Consolidate queueing search results under action
+            'queue_search_results'. Earlier, equivalent actions remain but are
+            now undocumented
+v0.4.68   - Add 'strict' option to 'search_artists'
+          - Add 'queue_multiple_search_results' action
+v0.4.67   - Multiple artist search results from 'search_artists' are now saved
+v0.4.66   - '_all_' now targets all visible speakers (including non-coordinators)
+v0.4.65   - Add 'if_queue/if_no_queue' conditional action modifiers
+v0.4.64   - Add 'multi_group/mg' action
+v0.4.63   - Add 'if_coordinator' conditional action modifier
+          - Add 'relative_sub_gain/rel_sub_gain/rsb' action
+          - Add 'rel_bass' and 'rel_treble' synonyms
+v0.4.62   - Use Sonos Favourites instead of URIs when creating alarms
+v0.4.61   - Add 'set_queue_position' action
+v0.4.60   - Add 'generic' HTTP macro and increase number of args to 12
+          - Fix remove_playlist / delete_playlist actions
+v0.4.59   - Add queue position option for 'add_sharelink_to_queue'
+v0.4.58   - Add 'stop_all' action
+v0.4.57   - Defect fix for 'if_stopped/if_playing'
+v0.4.56   - Suppress switch-to-coordinator for 'if_stopped/if_playing'
+v0.4.55   - Display "Sonos Chime" for default alarm
+          - Add 'playing_tv' action
+v0.4.54   - Display URIs for alarms that don't have Title metadata
+v0.4.53   - Update for SoCo v0.29.0
+v0.4.52   - Add 'last' option to 'play_from_queue' action
+          - Add 'random' option to 'play_from_queue' action
+          - Add 'last_added' option to 'play_from_queue' action
+v0.4.51   - Constrain ifaddr package to 0.1.7 for Python < 3.7
+          - Allow URL/Path parameters in HTTP API Server (fixes #38)
+v0.4.50   - Update to SoCo v0.28.0; pin SoCo to v0.27.1 for Python < 3.6
+v0.4.49   - Maintenance update
+v0.4.48   - Add 'sub_gain' action
+          - Add 'surround_volume_tv' action
+          - Add 'surround_volume_music' action
+          - Add 'surround_full_volume_enabled' action
+v0.4.47   - Improvements to 'cue_line_in' + maintenance updates
+          - Update to SoCo v0.26.4 fixes regression in obtaining track titles
+            when playing from local libraries
+v0.4.46   - Add 'cue_line_in' action
+          - Enable use of 'wait' and 'wait_until' with speaker names
+            and 'if_stopped/if_playing' tests
+v0.4.45   - Allow use of local speaker cache with HTTP API server
+v0.4.44   - Maintenance update
+v0.4.43   - HTTP API server: Expand number of macro arguments to nine
+          - HTTP API server: populate OpenAPI doc metadata
+v0.4.42   - Allow use of '_' to supply arguments to be ignored during
+            HTTP API server macro processing
+v0.4.41   - Add 'ugaig' synonym for 'ungroup_all_in_group'
+          - Fix typing issue with Python < 3.8 in HTTP API server
+v0.4.40   - Add '/macros/reload' operation to HTTP API server
+          - Add 'ungroup_all_in_group' action
+v0.4.39   - Maintenance release
+v0.4.38   - Allow parameterisation of HTTP API server macros
+v0.4.37   - Add `group_volume_equalise` action
+v0.4.36   - Document support for Apple Music share links
+          - Add 'macros' URL path to the HTTP API server
+v0.4.35   - Add 'mic_enabled' action
+v0.4.34   - Add macros capability to the HTTP API server
+v0.4.33   - Add 'tv_audio_delay' action
+          - Add 'alarms_zone' action to list alarms for target speaker only
+v0.4.32   - Allow 'copy_modify_alarm' to copy a modified alarm to a
+            different target speaker
+v0.4.31   - Add 'copy_modify_alarm' action
+v0.4.30   - Allow the use of 'loop' actions in interactive shell aliases
+v0.4.29   - Maintenance release
+v0.4.28   - Add 'audio_format' action for soundbars
+v0.4.27   - Maintenance release
+v0.4.26   - Add subwoofer/surround speaker status and control actions
+v0.4.25   - Add 'switch_to_tv' action
+v0.4.24   - Allow use of the 'loop' actions in interactive mode
+v0.4.23   - Add '/speakers' path to the HTTP API server
+v0.4.22   - Improve output of 'sleep_timer' action
+v0.4.21   - Add 'play_directory' action & notes about CD playback on macOS
+v0.4.20   - Add 'AIFF' to supported local file types, for direct CD playback
+            on macOS
+v0.4.19   - Add 'reboot_count' action
+          - Add type annotations to the API calls
+v0.4.18   - Add support for Deezer share links (require SoCo v0.24)
+v0.4.17   - Add '_end_on_pause_' option for 'play_file' action
+v0.4.16   - Improve behaviour of CTRL-C in single keystroke, interactive mode
+          - Find 'album_art' URIs in broader range of cases
+v0.4.15   - Actions 'play_file' and 'play_m3u' can now be cancelled in the
+            interactive shell without exiting the shell
+          - Change behaviour of CTRL-C in the shell: now requires 'exit'
+v0.4.14   - Improve signal handling (behaviour and outputs for CTRL-C, etc.)
+v0.4.13   - All 'wait' actions can now be cancelled in the interactive shell
+            using CTRL-C, without exiting interactive mode
+          - Interactive shell commands which run in subprocesses now do so in
+            OS shell environments. Hence, commands like 'tf > tracks.txt' now
+            work in interactive mode
+v0.4.12   - Display Plex track data in the output of 'list_queue'
+          - Add 'is_indexing' action
+v0.4.11   - Internal improvements
+          - Action 'list_queue' now returns silently if the queue is empty
+v0.4.10   - Fix regression: removal of 'Title' in 'track' output in some cases
+v0.4.9    - Add 'Radio Show' details to output of 'track', etc.
+          - 'wait_end_track' now detects a change of radio show
+v0.4.8    - Bugfixes and minor cosmetic changes
+v0.4.7    - Improve output of 'track' and related actions, including support
+            for Audible audio book content.
+v0.4.6    - Add 'track_follow_compact' action, and 'tf' and 'tfc' synonyms.
+v0.4.5    - Add podcast information to 'track' output
+          - Improve 'album_art': now returns a URL in more cases
+            (e.g., Spotify).
+          - Minor tidy up to the output of 'track'
+v0.4.4    - Add 'add_sharelink_to_queue/sharelink' action for Spotify/Tidal
+          - Add 'end_session' action
+          - Add 'get_channel' action
+v0.4.3    - Add 'get_uri' action
+          - Add support for 'USE_LOCAL_SPKR_CACHE' env. variable
+v0.4.2    - Rename 'sonos-http-server' to 'sonos-http-api-server'
+          - Additional HTTP API server logging
+v0.4.1    - Minor changes to HTTP API server
+v0.4.0    - Add HTTP API server functionality
+v0.3.50   - Minor cosmetic improvements & bugfixes
+v0.3.49   - Minor improvements to 'track_follow'
+v0.3.48   - Bugfixes
+v0.3.47   - Interactive mode 'track_follow' now runs in a subprocess
+v0.3.46   - Improve output of 'track_follow'
+v0.3.45   - Add 'track_follow' action outside interactive mode
+v0.3.44   - Add 'track_follow' command to the interactive shell
+v0.3.43   - Add support for imported local library playlists
+v0.3.42   - Minor bugfixes only
+v0.3.41   - Add 'relative_bass' and 'relative_treble' actions
+v0.3.40   - Simplify 'snooze_alarm' action (backward-compatible)
+v0.3.39   - Add 'snooze_alarm' action
+v0.3.38   - Add '--check_for_update' option
+v0.3.37   - Actions 'info' and 'sysinfo' now report correct playback state
+            for slave speakers
+          - Upgrade to SoCo v0.22.0, allowing some code simplification
+v0.3.36   - Fix regression in exit code; send error messages to stderr
+          - Action 'copy_alarm' now returns the ID of the copy
+v0.3.35   - Add 'move_alarm' action
+          - Remove 'alarm(s)_enabled' action ...
+          - Replace with 'enable_alarm(s)' and 'disable_alarm(s)' actions
+v0.3.34   - Add 'copy_alarm' action
+          - Reorder columns in output of 'alarms' to match the sequencing
+            used in 'create_alarm' and 'modify_alarm'
+v0.3.33   - Rename 'enable_alarm(s)' actions to 'alarm(s)_enabled'
+            (Original action names will still work, at least for now)
+          - Add 'list_alarms' synonym for 'alarms' action
+          - Add 'modify_alarm(s)' action
+v0.3.32   - Add 'exec' and 'cd' commands to the interactive shell
+          - Add '--subnets' option to 'sonos-discover', to specify
+            which IP addresses / subnets to search
+v0.3.31   - Add 'create_alarm/add_alarm' actions
+          - Add 'remove_alarm(s)' action to remove alarms by ID
+          - Add 'enable_alarm(s)' action to enable/disable alarms
+          - Include alarm ID in output from 'alarms' action
+v0.3.30   - Fixes #18 (exception when no speakers are discovered in cached mode)
+v0.3.29   - Cosmetic change to multi-line output (fixes a regression)
+v0.3.28   - Minor bugfixes
+v0.3.27   - Minor bugfixes
+v0.3.26   - Alias processing bugfixes
+v0.3.25   - Add argument substitution (%1, %2, etc.) to aliases
+            Note that the use of '_' to suppress arguments is now deprecated
+          - Add 'docs' command to shell
+v0.3.24   - Add 'available_actions' action
+          - Add 'wait_end_track' action
+v0.3.23   - Bugfix: Remove spurious newline when action returns no value (#17)
+v0.3.22   - Multiple sequential actions will now attempt to proceed in the
+            event of an action in the sequence failing
+v0.3.21   - Bugfix: correct issue where shell aliases can't be deleted
+v0.3.20   - Add the ability to save, load, and overwrite shell aliases from
+            text files
+v0.3.19   - Add "_" option to suppress pass-thru parameters in shell aliases
+          - Add single keystroke shell support for Windows
+          - Add 'playpause' as synonym for 'pauseplay'
+v0.3.18   - Add 'pauseplay' action
+          - Improve the prompt in Shell single keystroke mode
+v0.3.17   - Add 'version' command to the Shell
+          - Fix regression in 'remove_from_queue'
+          - Add 'groupstatus' action
+v0.3.16   - Selected actions targeted at a non-coordinator speaker in a
+            group are now diverted to the coordinator instead of returning
+            an error
+v0.3.15   - Add 'album_art' action
+v0.3.14   - Bugfixes to API and alias loop detection
+v0.3.13   - Shell aliases now accept parameters
+          - Network scan options now respected in normal discovery mode
+v0.3.12   - Bugfix for 'play_fav_radio_station_no' picking the wrong
+            station (#12).
+v0.3.11   - Allow aliases to include other aliases, with loop detection
+          - Add 'single keystroke' mode to the shell. (Not supported on
+            Windows.)
+v0.3.10   - Shell aliases can now be used for shell commands (except
+            alias!)
+          - Add 'push' and 'pop' shell commands to save / restore the
+            active speaker
+          - Shell and API bugfixes
+v0.3.9    - Add alias capability to the shell
+v0.3.8    - Shell history is now saved across shell sessions in
+            ~/.soco-cli/shell-history.txt
+          - Add 'play_fav_radio_station_no' action
+          - Shell now supports ' : ' for multiple actions, and 'wait' actions
+v0.3.7    - Fix 'readline' import error on Windows and add shell warning
+v0.3.6    - Add auto-completion for Interactive Shell commands
+          - Various shell improvements
+v0.3.5    - Interactive mode: quickly select speaker by number
+v0.3.4    - Fix refactoring bug
+v0.3.3    - Significantly improved Interactive Mode
+          - Bugfix for numbering issue in 'play_favourite_number'
+          - API change / bugfix for 'get_soco_object()'
+v0.3.2    - Interactive mode: add ability to set/unset active speaker
+          - Add 'play_favourite_number' action to play a favourite by its
+            number
+          - Remove API type hints for backward compatibility; bugfixes
+v0.3.1    - API interface change/expansion, and bugfix for local cache
+v0.3.0    - Add an API allowing the use of SoCo-CLI as a Python library
+          - Add early version of interactive mode
+          - Add the ability to get the speaker name from the $SPKR environment
+            variable
+          - Add 'wait_stopped_for_not_pause' action
+v0.2.1    - Performance improvement for speaker discovery with partial name
+            match
+          - Action 'play_m3u' now accepts files that contain any list of audio
+            filenames, without requiring M3U/M3U8 conventions
+v0.2.0    - Requires SoCo v0.21, and benefits from its big improvements
+          - If a speaker name is not found, discovery will now fall back to
+            scanning the network for a matching speaker
+          - Partial, case insensitive matches can now be used for speaker
+            naming when using normal discovery
+          - Supplying, ambiguous partial speaker names now results in an error
+          - 'Alternative Discovery' is now referred to as 'Cached Discovery'
+          - Add 'buttons' action to inspect/change whether speaker buttons
+            are enabled
+          - Add 'fixed_volume' action to inspect/change whether the Fixed
+            Volume feature is enabled (applies to Connect and Port)
+          - Add 'trueplay' action to inspect/change whether a Trueplay
+            tuning profile is enabled
+v0.1.54   - Add 'wait_stop_not_pause" action
+          - Action 'play_file' now accepts multiple files as parameters
+v0.1.53   - Action 'play_file' now supported back to Python 3.5
+          - Add simple 'interactive mode' option to 'play_m3u' action, allowing
+            'next track', 'pause', and 'resume' while playing a playlist
+v0.1.52   - Bugfix only
+v0.1.51   - Add queue position options to 'add_uri_to_queue'
+          - Restore Python 3.5+ compatibility
+v0.1.50   - Action 'play_file' can now be paused without terminating the server
+v0.1.49   - Minor fixes & update docs re: AAC playback issues
+v0.1.48   - Add 'r' option to 'play_m3u' to play a single, random track
+          - Add support for 'm3u8' playlist files
+          - Album art now displayed when using 'play_file'
+          - Add WMA file support for 'play_file'
+          - Add AAC file support for 'play_file' (with issues)
+v0.1.47   - Add 'play_m3u' action to play local M3U playlists
+v0.1.46   - Fix behaviour of 'play_uri' when playing file URLs
+          - Add support for M4A and MP4 playback using 'play_file'
+          - Add support for seeking within a track when using 'play_file'
+v0.1.45   - Add 'play_file' action for playback of local audio files
+            (Experimental: currently works for MP3, FLAC, OGG and WAV files)
+v0.1.44   - Simplify output format of 'zones' (etc.)
+          - Add 'first/start' option for various queue actions
+          - Add 'rename' action to rename speakers
+          - Add '--actions' option (same as '--commands')
+v0.1.43   - Add '_all_' option instead of targeting a named speaker
+          - Simplify the output of the 'groups' action
+          - Add 'commands' option to sonos, to print the list of available
+            commands
+v0.1.42   - Patch SoCo to provide full Python 3.9 support (until SoCo 0.21)
+          - Add 'battery' action to print battery status for Sonos Move speakers
+v0.1.41   - Improve time accuracy in 'wait_stopped_for'
+          - Improve playback state detection in 'wait_stopped_for'
+          - Further evolution of 'track' output for streams
+          - Add 'first/start' option to 'queue_search_number'
+          - Save search results when using 'list_playlist_tracks'
+v0.1.40   - Add 'seek_forward' action to jump ahead within a track
+          - Add 'seek_back' action to jump back within a track
+          - Action 'seek' now supports more flexible time formats
+          - Add 'seek_to' synonym for 'seek'
+          - Improve 'track' output when reporting a stopped stream
+          - Add 'min_netmask' option for alternative discovery
+          - Improve network selection logic when using alternative discovery
+          - Improve network timeout logic when using alternative discovery
+v0.1.39   - Added 'search_album', 'search_artist', search_track' synonyms
+          - Fix WARN(ING) setting for --log option
+          - Require SoCo >= 0.20
+v0.1.38   - Add search caching and indexed playback for 'tracks_in_album'
+          - Add search caching and indexed playback for 'list_albums'
+          - Add search caching and indexed playback for 'search_artists'
+          - Add '--docs' option to print URL to online documentation
+          - Add 'soco-discover' synonym for 'sonos-discover'
+          - Add line_in 'right_input' parameter for stereo paired P:5/Fives
+          - Behaviour change: Line-In starts playback after being selected
+v0.1.37   - Fix 'play_favourite_radio_station'
+          - Improve output from 'track' action for non-queue items
+          - Add 'cue_favourite_radio_station' action
+v0.1.36   - Add 'last_search' action to cache track and album searches
+          - Add 'queue_last_search_number' action
+v0.1.35   - Add 'queue_position' action
+          - Add 'play_next' option to 'queue_track' and 'queue_album'
+          - Add 'play_next' option for 'add_playlist_to_queue'
+          - Add 'play_next' option for 'add_favourite_to_queue'
+v0.1.34   - Add 'fade' synonym for 'cross_fade'
+          - Add 'remove_current_track_from_queue' action
+          - Add 'remove_last_track_from_queue' action
+v0.1.33   - Add 'none' as a synonym for 'off', in the 'repeat' action
+          - Add the ability to use sequences and ranges with 'remove_from_queue'
+v0.1.32   - Add 'shuffle' action for direct inspection and control of shuffle
+            mode
+          - Add 'repeat' action for direct inspection and control of repeat mode
+v0.1.31   - Add 'transfer_to' synonym for 'transfer_playback'
+          - Add 'create_playlist_from_queue' synonym for 'save_queue'
+          - Remove erroneous printout in 'tracks_in_albums'
+v0.1.30   - Added 'SHUFFLE_REPEAT_ONE' playback mode
+          - Add 'transfer_playback' action
+v0.1.29   - Updated logic fix for 'wait_stopped_for'
+          - Add 'status' synomym for 'playback'
+v0.1.28   - Add 'cue_favourite' action
+v0.1.27   - Add 'wait_for' synonym for 'wait'
+          - Fix minor timer expiry logic issue in 'wait_stopped_for'
+          - Improve SoCo version check
+          - Improve some error messages regarding use of ':'
+v0.1.26   - Add 'queue_track' action
+          - Add 'list_queue <track_number>' action
+v0.1.25   - Add music library functions: 'list_artists', 'list_albums',
+            'search_library', 'search_artists', 'search_albums'
+            'search_tracks', 'tracks_in_albums', 'queue_album'
+          - sonos-discover behaviour change: '-p' now prints the current speaker
+            data then exits, and '-s' has been removed.
+v0.1.24   - Add 'loop_to_start' action
+          - Allow CTRL-C to break out of 'wait_stopped_for' state on
+            Windows (SIGTERM)
+          - Add 'soco' synonym for 'sonos' command
+          - Fix loop counting defect
+v0.1.23   - Add conditional modifiers 'if_playing' and 'if_stopped'
+          _ Add actions 'loop_for' and 'loop_until'
+          - Reintroduce SIGKILL workaround for non-Windows platforms
+v0.1.22_1 - Revert use of SIGKILL (was preventing running on Windows)
+v0.1.22   - Add 'wait_stopped_for' action (experimental)
+          - Add 'loop' and 'loop <iterations>' actions (experimental)
+          - Fix 100 track display limit on 'list_playlist_tracks'
+v0.1.21   - Add 'rfq' synonym for 'remove_from_queue'
+          - Added 'wait_start' and 'wait_stop' actions
+v0.1.20   - Add 'list_all_playlist_tracks' action
+v0.1.19   - Exact speaker name matching is now case sensitive
+          - Additional logging
+          - Add 'list_playlist_tracks' action
+v0.1.18   - Add README notes on what sources can be played back
+          - 'add_playlist_to_queue' now returns the first track queue position
+          - Experimental support for 'add_fav_to_queue', with some issues
+          - Fix issue with WARN-level logging enabled by default
+v0.1.17_1 - Remove backport requirement (was breaking Windows installs)
+v0.1.17   - Added 'wait_until' action
+          - Fix for Python 3.7 requirement
+v0.1.16   - Add ability to cancel sleep timers
+          - Add the 'sleep_at' action to schedule a sleep timer
+          - Allow 'wait', 'sleep', to use HH:MM:SS format for durations
+          - Miscellaneous minor fixes
+v0.1.15   - Improve sleep timer action to allow durations in h/m/s
+          - Initial logging capability
+v0.1.14   - Improved, faster discovery for local speaker list
+          - Add 'libraries' action
+          - Add 'sysinfo' action
+v0.1.13   - Change to local speaker list file contents. Old speaker data files
+            will be removed and rediscovery will be required.
+          - Simple SIGINT handling added.
+          - Added '-v' option to sonos-discover
+          - 'sonos-discover -s' prints Sonos software version of each speaker
+          - Add 'alarms' action to list Sonos alarms
