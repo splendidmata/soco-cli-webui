@@ -299,7 +299,35 @@ journalctl -u sonoradio -f
 
 ### Linux 系统服务配置（本地部署方式）
 
-创建 `/etc/systemd/system/sonoradio.service`：
+**1. 安装项目到系统目录：**
+
+```bash
+# 下载项目（示例安装到 /opt/sonoradio）
+sudo mkdir -p /opt/sonoradio
+sudo chown $USER:$USER /opt/sonoradio
+git clone https://github.com/splendidmata/soco-cli-webui.git /opt/sonoradio
+
+cd /opt/sonoradio
+
+# 创建虚拟环境
+python3 -m venv venv
+
+# 激活虚拟环境并安装依赖
+source venv/bin/activate
+pip install -r requirements.txt
+pip install gunicorn
+
+# 创建数据库目录
+mkdir -p db
+```
+
+**2. 创建系统服务文件：**
+
+```bash
+sudo nano /etc/systemd/system/sonoradio.service
+```
+
+内容如下：
 
 ```ini
 [Unit]
@@ -307,10 +335,16 @@ Description=SonoRadio Sonos Web UI
 After=network.target
 
 [Service]
-User=pi
+Type=notify
+User=<您的用户名>          # 修改为您的用户名，如 pi、ubuntu、root 等
 WorkingDirectory=/opt/sonoradio
 Environment="PATH=/opt/sonoradio/venv/bin"
-ExecStart=/opt/sonoradio/venv/bin/gunicorn -w 4 -b 0.0.0.0:8888 web_ui:app
+Environment="PORT=8888"
+ExecStart=/opt/sonoradio/venv/bin/gunicorn -w 4 -b 0.0.0.0:8888 --access-logfile /var/log/sonoradio/access.log --error-logfile /var/log/sonoradio/error.log web_ui:app
+ExecReload=/bin/kill -s HUP $MAINPID
+KillMode=mixed
+TimeoutStopSec=5
+PrivateTmp=true
 Restart=always
 RestartSec=5
 
@@ -318,11 +352,91 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
+**3. 创建日志目录并设置权限：**
+
 ```bash
-systemctl daemon-reload
-systemctl enable sonoradio
-systemctl start sonoradio
+sudo mkdir -p /var/log/sonoradio
+sudo chown $USER:$USER /var/log/sonoradio
 ```
+
+**4. 启动服务：**
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable sonoradio
+sudo systemctl start sonoradio
+
+# 查看服务状态
+sudo systemctl status sonoradio
+
+# 查看日志
+sudo journalctl -u sonoradio -f
+```
+
+### mDNS 系统服务配置（可选）
+
+mDNS 允许通过 `sonoradio.local` 访问服务，无需记忆 IP 地址。
+
+**1. 安装 avahi-daemon：**
+
+```bash
+# Debian/Ubuntu
+sudo apt update && sudo apt install -y avahi-daemon avahi-utils
+
+# OpenWRT
+opkg update && opkg install avahi-daemon
+```
+
+**2. 创建 avahi 服务文件：**
+
+```bash
+sudo nano /etc/avahi/services/sonoradio.service
+```
+
+内容如下：
+
+```xml
+<?xml version="1.0" standalone='no'?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+  <name replace-wildcards="yes">SonoRadio on %h</name>
+  <service>
+    <type>_http._tcp</type>
+    <port>8888</port>
+    <txt-record>path=/</txt-record>
+  </service>
+</service-group>
+```
+
+**3. 重启 avahi-daemon 服务：**
+
+```bash
+# Debian/Ubuntu
+sudo systemctl restart avahi-daemon
+
+# OpenWRT
+/etc/init.d/avahi-daemon restart
+```
+
+**4. 验证 mDNS 服务：**
+
+```bash
+# 检查服务是否发布
+avahi-browse -r _http._tcp
+
+# 测试解析
+avahi-resolve -n sonoradio.local
+```
+
+**5. 访问服务：**
+
+在浏览器中访问：
+
+```
+http://sonoradio.local:8888
+```
+
+**提示**：如果 `sonoradio.local` 无法解析，可能是 `avahi-daemon` 服务未启动。执行 `sudo systemctl status avahi-daemon` 检查服务状态。
 
 ## 使用说明
 
