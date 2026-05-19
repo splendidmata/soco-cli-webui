@@ -712,10 +712,18 @@ function refreshPagePartial(callback) {
         }
 
         var newSleepStatus = doc.querySelector('#sleepTimerStatus');
-        if (newSleepStatus && sleepTimerServerSeconds === null) {
+        if (newSleepStatus) {
             var newSec = parseInt(newSleepStatus.getAttribute('data-sleep-seconds'));
-            if (newSec > 0) {
+            // 如果服务器有定时器且本地没有，或者服务器定时器与本地不同步，则更新
+            if (newSec > 0 && (sleepTimerServerSeconds === null || Math.abs(newSec - sleepTimerServerSeconds) > 5)) {
                 displaySleepTimer(newSec);
+            } else if (newSec <= 0 && sleepTimerServerSeconds !== null) {
+                // 服务器定时器已取消，本地也需要重置
+                stopSleepTimerCountdown();
+                sleepTimerServerSeconds = null;
+                document.getElementById('sleepTimerStatus').textContent = '--';
+                document.getElementById('sleepCancelBtn').classList.add('hidden');
+                document.getElementById('sleepTimerCountdown').textContent = '';
             }
         }
 
