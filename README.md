@@ -59,34 +59,33 @@ SonoRadio 是一个基于 Flask 的 Sonos 扬声器 Web 控制界面，提供直
 
 ### 🐳 Docker 一键部署（推荐）
 
-**OpenWRT / Linux 主机：**
+**⚠️ 重要：Sonos 设备发现依赖局域网广播（UDP），Docker 必须使用 `host` 网络模式才能正常工作。桥接模式下无法发现扬声器。**
+
+**OpenWRT / Linux 主机（唯一支持的方式）：**
 
 ```bash
 # 创建数据目录
 mkdir -p /opt/sonoradio/db
 
-# 启动容器（host 网络模式，推荐）
+# 启动容器（必须使用 host 网络模式）
 docker run -d \
   --name sonoradio \
   --network host \
   --restart unless-stopped \
   -v /opt/sonoradio/db:/app/db \
   splendidmata/sonoradio:master
-
-# 访问192.168.xx.xx:5000
-
 ```
 
-**macOS / Windows（桥接模式）：**
-
-```bash
-docker run -d \
-  --name sonoradio \
-  --restart unless-stopped \
-  -p 8888:8888 \
-  -v $(pwd)/db:/app/db \
-  splendidmata/sonoradio
+**访问地址：**
 ```
+http://<Docker主机IP>:5000
+```
+
+**说明：**
+- Docker 容器内部端口固定为 **5000**
+- 使用 `host` 网络模式时，端口映射参数 `-p` 无效
+- macOS / Windows 的 Docker Desktop 由于虚拟机隔离，可能无法正常发现 Sonos 设备
+- 推荐在 OpenWRT 路由器或 Linux 主机上部署
 
 ### 🖥️ 本地部署（非 Docker）
 
@@ -392,15 +391,13 @@ http://sonoradio.local:8888
 
 ## 网络配置说明
 
-**⚠️ 重要：Sonos 设备发现依赖局域网广播（UDP），确保网络配置正确。**
+**⚠️ 重要：Sonos 设备发现依赖局域网广播（UDP），Docker 必须使用 `host` 网络模式。**
 
-### 推荐：host 模式（Linux / OpenWRT）
+### 唯一支持：host 模式（Linux / OpenWRT）
 
 使用 `--network host` 模式，容器直接使用主机网络栈，能够完美发现局域网内的 Sonos 扬声器。
 
-### 桥接模式（macOS / Windows）
-
-macOS 和 Windows 的 Docker Desktop 使用虚拟机，host 模式可能无法正常工作。建议使用桥接模式并映射端口。
+> **注意**：macOS / Windows 的 Docker Desktop 由于虚拟机隔离，即使使用 host 模式也可能无法正常发现 Sonos 设备。推荐在 OpenWRT 路由器或 Linux 主机上部署。
 
 ### mDNS 配置（可选）
 
@@ -419,9 +416,11 @@ echo 'sonoradio' > /etc/avahi/hosts
 
 | 变量名 | 默认值 | 说明 |
 |--------|--------|------|
-| `PORT` | 8888 | 服务端口 |
+| `PORT` | 8888（本地）/ 5000（Docker） | 服务端口（Docker 容器内固定为 5000） |
 | `TZ` | UTC | 时区设置（如 Asia/Shanghai） |
 | `DEBUG` | false | 是否启用调试模式 |
+
+> **Docker 端口说明**：Docker 容器内部端口固定为 **5000**，使用 `host` 网络模式时直接访问主机的 5000 端口。
 
 ## 目录结构
 
@@ -537,8 +536,9 @@ DELETE /api/radio_stations/<id> # 删除电台
 ### Q: 服务无法访问？
 
 **解决方案：**
-- 检查端口是否被占用：`netstat -tlnp | grep 8888`
-- 检查防火墙设置，确保 8888 端口开放
+- Docker：检查端口 5000 是否被占用：`netstat -tlnp | grep 5000`
+- 本地部署：检查端口 8888 是否被占用：`netstat -tlnp | grep 8888`
+- 检查防火墙设置，确保对应端口开放
 - 确认服务正在运行：`docker ps` 或 `systemctl status sonoradio`
 
 ### Q: 音量控制不流畅？
