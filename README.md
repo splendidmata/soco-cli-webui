@@ -1,6 +1,5 @@
 # SonoRadio - Sonos 扬声器 Web 控制界面
 
-![SonoRadio](https://github.com/splendidmata/soco-cli-webui/assets/xxx/xxx)
 
 ## 项目简介
 
@@ -91,14 +90,11 @@ docker run -d \
 
 ### 🖥️ 本地部署（非 Docker）
 
-**环境要求：**
-- Python 3.7+
-- pip 包管理工具
-- 局域网内有 Sonos 扬声器
+本教程将指导您如何将 SonoRadio 部署为系统服务，实现开机自启和后台运行。
 
 #### ⚡ 一键安装脚本（推荐）
 
-项目提供了一键安装脚本，自动完成所有配置，包括系统服务、开机自启和 mDNS：
+项目提供了一键安装脚本，自动完成所有配置：
 
 ```bash
 # 下载安装脚本
@@ -114,11 +110,13 @@ sudo ./install.sh 8080
 
 **一键脚本功能：**
 - ✅ 自动检测操作系统（Debian/Ubuntu/OpenWRT/Armbian）
-- ✅ 安装系统依赖（Python3、Git、Avahi）
+- ✅ 安装系统依赖（Python3、Git、Avahi、logrotate）
 - ✅ 克隆/更新项目到 `/opt/sonoradio`
 - ✅ 创建 Python 虚拟环境并安装依赖
+- ✅ 自动配置 Gunicorn worker 数量（根据 CPU 核心数）
 - ✅ 配置 systemd 系统服务（开机自启）
 - ✅ 配置 avahi-daemon mDNS 服务
+- ✅ 配置 logrotate 日志轮转
 - ✅ 启动服务并设置开机自启
 
 **安装后访问：**
@@ -127,58 +125,255 @@ http://<主机IP>:8888
 http://sonoradio.local:8888
 ```
 
-**服务管理命令：**
-```bash
-# 查看状态
-sudo systemctl status sonoradio
+#### 手动安装步骤
 
-# 查看日志
+##### 一、环境准备
+
+**系统要求：**
+- Linux 系统（Debian/Ubuntu/Armbian/OpenWRT）
+- Python 3.7+
+- 网络连接
+
+**更新系统并安装依赖：**
+
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install python3 python3-pip python3-venv -y
+```
+
+##### 二、安装 SonoRadio
+
+**创建工作目录：**
+
+```bash
+sudo mkdir -p /opt/sonoradio
+sudo chown $USER:$USER /opt/sonoradio
+```
+
+**克隆项目：**
+
+```bash
+git clone https://github.com/splendidmata/soco-cli-webui.git /opt/sonoradio
+cd /opt/sonoradio
+```
+
+**创建虚拟环境：**
+
+```bash
+python3 -m venv venv
+```
+
+**安装依赖：**
+
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
+pip install gunicorn
+deactivate
+```
+
+##### 三、配置 Gunicorn
+
+**创建 Gunicorn 配置文件：**
+
+```bash
+nano /opt/sonoradio/gunicorn_config.py
+```
+
+**配置文件内容：**
+
+```python
+bind = "0.0.0.0:8888"
+workers = 4
+worker_class = "sync"
+worker_connections = 1000
+timeout = 30
+keepalive = 2
+
+daemon = False
+pidfile = "/opt/sonoradio/gunicorn.pid"
+errorlog = "/opt/sonoradio/logs/error.log"
+accesslog = None
+loglevel = "error"
+
+raw_env = [
+    "FLASK_ENV=production",
+]
+```
+
+**创建日志目录：**
+
+```bash
+mkdir -p /opt/sonoradio/logs
+touch /opt/sonoradio/logs/error.log
+```
+
+##### 四、配置 systemd 服务
+
+**创建服务文件：**
+
+```bash
+sudo nano /etc/systemd/system/sonoradio.service
+```
+
+**服务配置内容：**
+
+```ini
+[Unit]
+Description=SonoRadio - Sonos Speaker Control Web UI
+After=network.target
+
+[Service]
+Type=notify
+User=root
+WorkingDirectory=/opt/sonoradio
+Environment="PATH=/opt/sonoradio/venv/bin"
+ExecStart=/opt/sonoradio/venv/bin/gunicorn -c /opt/sonoradio/gunicorn_config.py web_ui:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+##### 五、启动服务
+
+**重新加载 systemd 配置：**
+
+```bash
+sudo systemctl daemon-reload
+```
+
+**启动服务：**
+
+```bash
+sudo systemctl start sonoradio
+```
+
+**查看服务状态：**
+
+```bash
+sudo systemctl status sonoradio
+```
+
+**设置开机自启：**
+
+```bash
+sudo systemctl enable sonoradio
+```
+
+##### 六、配置 mDNS（局域网域名访问）
+
+通过 mDNS 服务，可以使用 `sonoradio.local` 域名访问，无需记忆 IP 地址。
+
+**安装 Avahi：**
+
+```bash
+sudo apt install avahi-daemon -y
+```
+
+**配置自定义主机名：**
+
+```bash
+sudo nano /etc/avahi/services/sonoradio.service
+```
+
+写入以下内容：
+
+```xml
+<?xml version="1.0" standalone='no'?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<service-group>
+    <name replace-wildcards="yes">SonoRadio</name>
+    <service>
+        <type>_http._tcp</type>
+        <port>8888</port>
+    </service>
+</service-group>
+```
+
+**设置主机名（可选）：**
+
+```bash
+sudo hostnamectl set-hostname sonoradio
+```
+
+编辑 `/etc/hosts`，添加：
+
+```
+127.0.0.1   localhost sonoradio
+```
+
+**重启 Avahi：**
+
+```bash
+sudo systemctl restart avahi-daemon
+sudo systemctl enable avahi-daemon
+```
+
+**验证：**
+
+```bash
+ping sonoradio.local
+```
+
+##### 七、日志管理
+
+**查看 Gunicorn 错误日志：**
+
+```bash
+tail -f /opt/sonoradio/logs/error.log
+```
+
+**查看 systemd 日志：**
+
+```bash
 sudo journalctl -u sonoradio -f
+```
+
+**配置 logrotate（自动清理日志）：**
+
+创建配置文件：
+
+```bash
+sudo nano /etc/logrotate.d/sonoradio
+```
+
+写入以下内容：
+
+```
+/opt/sonoradio/logs/error.log {
+    daily
+    rotate 7
+    maxsize 10M
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+}
+```
+
+##### 八、服务管理命令
+
+```bash
+# 启动服务
+sudo systemctl start sonoradio
+
+# 停止服务
+sudo systemctl stop sonoradio
 
 # 重启服务
 sudo systemctl restart sonoradio
 
-# 停止服务
-sudo systemctl stop sonoradio
-```
+# 查看状态
+sudo systemctl status sonoradio
 
-#### 手动安装步骤
+# 禁用开机自启
+sudo systemctl disable sonoradio
 
-如果不想使用一键脚本，可以手动安装：
-
-```bash
-# 1. 克隆项目
-git clone https://github.com/splendidmata/soco-cli-webui.git
-cd soco-cli-webui
-
-# 2. 创建虚拟环境（推荐）
-python -m venv venv
-
-# 3. 激活虚拟环境
-# Linux/macOS:
-source venv/bin/activate
-# Windows:
-venv\Scripts\activate
-
-# 4. 安装依赖
-pip install -r requirements.txt
-
-# 5. 启动服务
-# 程序会自动创建数据库目录并初始化默认电台
-python web_ui.py
-```
-
-**使用 Gunicorn 生产部署：**
-
-```bash
-# 安装 Gunicorn
-pip install gunicorn
-
-# 启动服务（后台运行）
-gunicorn -w 4 -b 0.0.0.0:8888 web_ui:app &
-
-# 或者使用 nohup 持久运行
-nohup gunicorn -w 4 -b 0.0.0.0:8888 web_ui:app > sonoradio.log 2>&1 &
+# 查看日志
+sudo journalctl -u sonoradio -f
 ```
 
 ### 访问服务
@@ -300,194 +495,6 @@ POST /api/radio_stations     # 添加新电台 {"title": "电台名称", "url": 
 PUT /api/radio_stations/<id> # 更新电台
 DELETE /api/radio_stations/<id> # 删除电台
 ```
-
-## 部署指南
-
-### OpenWRT 部署
-
-```bash
-# 安装 Docker
-opkg update && opkg install docker luci-app-dockerman
-
-# 启动 Docker 服务
-/etc/init.d/docker start
-/etc/init.d/docker enable
-
-# 创建目录并启动容器
-mkdir -p /opt/sonoradio/db
-docker run -d --name sonoradio --network host --restart unless-stopped -v /opt/sonoradio/db:/app/db splendidmata/sonoradio
-```
-
-### Linux 系统服务配置（Docker 方式）
-
-创建 `/etc/systemd/system/sonoradio.service`：
-
-```ini
-[Unit]
-Description=SonoRadio Sonos Web UI
-After=network.target docker.service
-Requires=docker.service
-
-[Service]
-User=root
-ExecStart=/usr/bin/docker run --rm --name sonoradio --network host -v /opt/sonoradio/db:/app/db splendidmata/sonoradio
-ExecStop=/usr/bin/docker stop sonoradio
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-systemctl daemon-reload
-systemctl enable sonoradio
-systemctl start sonoradio
-
-# 查看日志
-journalctl -u sonoradio -f
-```
-
-### Linux 系统服务配置（本地部署方式）
-
-**1. 安装项目到系统目录：**
-
-```bash
-# 下载项目（示例安装到 /opt/sonoradio）
-sudo mkdir -p /opt/sonoradio
-sudo chown $USER:$USER /opt/sonoradio
-git clone https://github.com/splendidmata/soco-cli-webui.git /opt/sonoradio
-
-cd /opt/sonoradio
-
-# 创建虚拟环境
-python3 -m venv venv
-
-# 激活虚拟环境并安装依赖
-source venv/bin/activate
-pip install -r requirements.txt
-pip install gunicorn
-
-# 创建数据库目录
-mkdir -p db
-```
-
-**2. 创建系统服务文件：**
-
-```bash
-sudo nano /etc/systemd/system/sonoradio.service
-```
-
-内容如下：
-
-```ini
-[Unit]
-Description=SonoRadio Sonos Web UI
-After=network.target
-
-[Service]
-Type=notify
-User=<您的用户名>          # 修改为您的用户名，如 pi、ubuntu、root 等
-WorkingDirectory=/opt/sonoradio
-Environment="PATH=/opt/sonoradio/venv/bin"
-Environment="PORT=8888"
-ExecStart=/opt/sonoradio/venv/bin/gunicorn -w 4 -b 0.0.0.0:8888 --access-logfile /var/log/sonoradio/access.log --error-logfile /var/log/sonoradio/error.log web_ui:app
-ExecReload=/bin/kill -s HUP $MAINPID
-KillMode=mixed
-TimeoutStopSec=5
-PrivateTmp=true
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
-
-**3. 创建日志目录并设置权限：**
-
-```bash
-sudo mkdir -p /var/log/sonoradio
-sudo chown $USER:$USER /var/log/sonoradio
-```
-
-**4. 启动服务：**
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable sonoradio
-sudo systemctl start sonoradio
-
-# 查看服务状态
-sudo systemctl status sonoradio
-
-# 查看日志
-sudo journalctl -u sonoradio -f
-```
-
-### mDNS 系统服务配置（可选）
-
-mDNS 允许通过 `sonoradio.local` 访问服务，无需记忆 IP 地址。
-
-**1. 安装 avahi-daemon：**
-
-```bash
-# Debian/Ubuntu
-sudo apt update && sudo apt install -y avahi-daemon avahi-utils
-
-# OpenWRT
-opkg update && opkg install avahi-daemon
-```
-
-**2. 创建 avahi 服务文件：**
-
-```bash
-sudo nano /etc/avahi/services/sonoradio.service
-```
-
-内容如下：
-
-```xml
-<?xml version="1.0" standalone='no'?>
-<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
-<service-group>
-  <name replace-wildcards="yes">SonoRadio on %h</name>
-  <service>
-    <type>_http._tcp</type>
-    <port>8888</port>
-    <txt-record>path=/</txt-record>
-  </service>
-</service-group>
-```
-
-**3. 重启 avahi-daemon 服务：**
-
-```bash
-# Debian/Ubuntu
-sudo systemctl restart avahi-daemon
-
-# OpenWRT
-/etc/init.d/avahi-daemon restart
-```
-
-**4. 验证 mDNS 服务：**
-
-```bash
-# 检查服务是否发布
-avahi-browse -r _http._tcp
-
-# 测试解析
-avahi-resolve -n sonoradio.local
-```
-
-**5. 访问服务：**
-
-在浏览器中访问：
-
-```
-http://sonoradio.local:8888
-```
-
-**提示**：如果 `sonoradio.local` 无法解析，可能是 `avahi-daemon` 服务未启动。执行 `sudo systemctl status avahi-daemon` 检查服务状态。
 
 ## 使用说明
 
