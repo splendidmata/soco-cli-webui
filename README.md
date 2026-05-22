@@ -73,7 +73,8 @@ docker run -d \
   --network host \
   --restart unless-stopped \
   -v /opt/sonoradio/db:/app/db \
-  splendidmata/sonoradio:master
+  splendidwrx/sonoradio:master
+
 ```
 
 **访问地址：**
