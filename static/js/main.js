@@ -405,6 +405,25 @@ function toggleMute() {
     .catch(e => showNotification('操作失败'));
 }
 
+function toggleCrossfade() {
+    const zone = getZone();
+    if (!zone) {
+        showNotification('请先选择扬声器');
+        return;
+    }
+    fetch('/api/speaker/' + encodeURIComponent(zone) + '/toggle_crossfade', { method: 'POST' })
+    .then(r => r.json())
+    .then(d => {
+        if (d.success) {
+            const btn = document.getElementById('mainCrossfadeBtn');
+            btn.classList.toggle('active', d.cross_fade);
+            showNotification(d.cross_fade ? '已开启淡入淡出' : '已关闭淡入淡出');
+            refreshPagePartial();
+        }
+    })
+    .catch(e => showNotification('操作失败'));
+}
+
 function showNotification(msg) {
     const n = document.createElement('div');
     n.textContent = msg;
@@ -650,6 +669,16 @@ function refreshPagePartial(callback) {
         }
         
         var isMuted = newMuteBtn ? newMuteBtn.classList.contains('muted') : false;
+        var isCrossfade = false;
+
+        var newCrossfadeBtn = doc.querySelector('#mainCrossfadeBtn');
+        var oldCrossfadeBtn = document.querySelector('#mainCrossfadeBtn');
+        if (newCrossfadeBtn && oldCrossfadeBtn) {
+            isCrossfade = newCrossfadeBtn.classList.contains('active');
+        }
+        if (oldCrossfadeBtn) {
+            oldCrossfadeBtn.classList.toggle('active', isCrossfade);
+        }
         ['volumeDownBtn', 'volumeUpBtn'].forEach(function(id) {
             var el = document.getElementById(id);
             if (el) {

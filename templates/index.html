@@ -129,6 +129,7 @@
     <div class="bottom-player" id="bottomPlayer">
         {% set sp0 = speakers[0] if speakers else {} %}
         {% set muted = sp0.get('mute', False) %}
+        {% set crossfade_on = sp0.get('cross_fade', False) %}
         <div class="player-content">
             <div class="player-track-info" id="playerTrackInfo">
                 {% if sp0.get('track') %}
@@ -175,6 +176,9 @@
                 <div class="player-volume">
                     <button class="player-mute-btn {% if muted %}muted{% endif %}" id="mainMuteBtn" onclick="toggleMute()" title="静音">
                         {% if muted %}🔇{% else %}🔊{% endif %}
+                    </button>
+                    <button class="player-crossfade-btn {% if crossfade_on %}active{% endif %}" id="mainCrossfadeBtn" onclick="toggleCrossfade()" title="淡入淡出">
+                        ↻
                     </button>
                     <button class="player-volume-btn {% if muted %}disabled{% endif %}" id="volumeDownBtn" onclick="adjustVolume(-1)" title="音量减" {% if muted %}disabled{% endif %}>-</button>
                     <div class="player-volume-slider-container">

@@ -140,6 +140,7 @@ def get_speaker_status(speaker_name):
         "ip": None,
         "volume": None,
         "mute": None,
+        "cross_fade": False,
         "state": None,
         "track": None,
         "artist": None,
@@ -162,6 +163,11 @@ def get_speaker_status(speaker_name):
         status["mute"] = speaker.mute
     except Exception as e:
         logger.warning(f"Could not get volume/mute for {speaker_name}: {e}")
+
+    try:
+        status["cross_fade"] = speaker.cross_fade
+    except Exception as e:
+        logger.warning(f"Could not get cross_fade for {speaker_name}: {e}")
 
     try:
         st = speaker.get_sleep_timer()
@@ -461,6 +467,20 @@ def api_toggle_mute(speaker_name):
         new_mute = not current_mute
         speaker.mute = new_mute
         return jsonify({"success": True, "muted": new_mute})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/api/speaker/<speaker_name>/toggle_crossfade", methods=["POST"])
+def api_toggle_crossfade(speaker_name):
+    speaker, error = get_soco_object(speaker_name)
+    if not speaker:
+        return jsonify({"success": False, "error": error})
+    try:
+        current = speaker.cross_fade
+        new_val = not current
+        speaker.cross_fade = new_val
+        return jsonify({"success": True, "cross_fade": new_val})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
