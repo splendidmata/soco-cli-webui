@@ -845,8 +845,17 @@ h1 {
     justify-content: center;
 }
 
-.player-crossfade-btn:hover, .player-crossfade-btn.active {
-    color: var(--accent);
+.player-crossfade-btn {
+    color: #ff6b6b;
+}
+.player-crossfade-btn:hover {
+    color: #ff4444;
+}
+.player-crossfade-btn.active {
+    color: #2ecc71;
+}
+.player-crossfade-btn.active:hover {
+    color: #27ae60;
 }
 
 .player-volume-btn {
