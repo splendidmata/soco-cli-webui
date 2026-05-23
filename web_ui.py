@@ -14,7 +14,7 @@ from soco_cli.api import (
 
 app = Flask(__name__)
 app.secret_key = "soco-cli-web-ui-secret-key"
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 DATABASE = os.path.join(os.path.dirname(__file__), "db", "radio_stations.db")
