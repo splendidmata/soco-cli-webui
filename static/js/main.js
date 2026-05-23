@@ -712,17 +712,11 @@ function refreshPagePartial(callback) {
         }
 
         var newSleepStatus = doc.querySelector('#sleepTimerStatus');
-        console.log('[DEBUG] newSleepStatus:', newSleepStatus ? newSleepStatus.textContent : 'null', 'data-sleep-seconds:', newSleepStatus ? newSleepStatus.getAttribute('data-sleep-seconds') : 'null');
-        console.log('[DEBUG] sleepTimerServerSeconds:', sleepTimerServerSeconds);
         if (newSleepStatus) {
             var newSec = parseInt(newSleepStatus.getAttribute('data-sleep-seconds'));
-            console.log('[DEBUG] newSec:', newSec);
-            // 服务器有定时器（newSec > 0），更新本地状态
             if (newSec > 0) {
-                console.log('[DEBUG] Calling displaySleepTimer with:', newSec);
                 displaySleepTimer(newSec);
             } else if (newSec <= 0 && sleepTimerServerSeconds !== null) {
-                // 服务器定时器已取消，本地也需要重置
                 stopSleepTimerCountdown();
                 sleepTimerServerSeconds = null;
                 document.getElementById('sleepTimerStatus').textContent = '--';

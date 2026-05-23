@@ -161,14 +161,14 @@
                 </select>
                 <div class="player-sleep-timer" id="playerSleepTimer">
                     <span class="sleep-timer-label">⏳ 定时关闭：</span>
-                    <span class="sleep-timer-status" id="sleepTimerStatus" data-sleep-seconds="{{ st.seconds }}">
-                        {{ st.display }}
+                    <span class="sleep-timer-status" id="sleepTimerStatus" data-sleep-seconds="{{ sleep_timer.seconds }}">
+                        {{ sleep_timer.display }}
                 </span>
                 <button class="sleep-preset-btn" onclick="setSleepTimer(15)">15m</button>
                 <button class="sleep-preset-btn" onclick="setSleepTimer(30)">30m</button>
                 <button class="sleep-preset-btn" onclick="setSleepTimer(60)">1h</button>
                 <button class="sleep-preset-btn" onclick="setSleepTimer(120)">2h</button>
-                <button class="sleep-cancel-btn {% if not st.active %}hidden{% endif %}" id="sleepCancelBtn" onclick="cancelSleepTimer()">取消定时</button>
+                <button class="sleep-cancel-btn {% if not sleep_timer.active %}hidden{% endif %}" id="sleepCancelBtn" onclick="cancelSleepTimer()">取消定时</button>
                 <span class="sleep-timer-countdown" id="sleepTimerCountdown"></span>
                 </div>
 

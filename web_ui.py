@@ -165,7 +165,7 @@ def get_speaker_status(speaker_name):
 
     try:
         st = speaker.get_sleep_timer()
-        if st is not None:
+        if st is not None and st > 0:
             status["sleep_timer"] = st
             status["sleep_timer_remaining"] = st
         else:
@@ -214,19 +214,20 @@ def index():
 
     radio_stations = get_radio_stations()
 
-    return render_template("index.html", speakers=speaker_statuses, radio_stations=radio_stations, st=st_info)
+    return render_template("index.html", speakers=speaker_statuses, radio_stations=radio_stations, sleep_timer=st_info)
 
 
 def _get_sleep_timer_info(speaker_statuses):
     if not speaker_statuses:
         return {"active": False, "seconds": -1, "display": "--"}
-    st = speaker_statuses[0].get("sleep_timer")
-    if st is None:
-        return {"active": False, "seconds": -1, "display": "--"}
-    m = int(st) // 60
-    s = int(st) % 60
-    display = f"{m}:{s:02d}"
-    return {"active": True, "seconds": int(st), "display": display}
+    for status in speaker_statuses:
+        st = status.get("sleep_timer")
+        if st is not None and st > 0:
+            m = int(st) // 60
+            s = int(st) % 60
+            display = f"{m}:{s:02d}"
+            return {"active": True, "seconds": int(st), "display": display}
+    return {"active": False, "seconds": -1, "display": "--"}
 
 
 @app.route("/speaker/<speaker_name>")
