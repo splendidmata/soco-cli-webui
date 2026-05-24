@@ -3,6 +3,7 @@
 import logging
 import os
 import sqlite3
+import time
 from flask import Flask, jsonify, redirect, render_template, request, url_for
 
 from soco_cli.api import (
@@ -133,6 +134,34 @@ def delete_radio_station(station_id):
 # Initialize database
 init_db()
 
+_speaker_cache = {"timestamp": 0, "data": [], "statuses": {}}
+
+def get_cached_speakers(timeout=5):
+    now = time.time()
+    if now - _speaker_cache["timestamp"] < timeout and _speaker_cache["data"]:
+        return _speaker_cache["data"]
+    speakers = get_all_speaker_names()
+    _speaker_cache["timestamp"] = now
+    _speaker_cache["data"] = speakers
+    _speaker_cache["statuses"] = {}
+    return speakers
+
+def get_cached_speaker_status(name, timeout=5):
+    now = time.time()
+    if name in _speaker_cache["statuses"] and now - _speaker_cache["timestamp"] < timeout:
+        return _speaker_cache["statuses"][name]
+    status = get_speaker_status(name)
+    _speaker_cache["statuses"][name] = status
+    return status
+
+
+@app.after_request
+def add_cache_headers(response):
+    if request.path.startswith('/static/'):
+        response.cache_control.max_age = 86400
+        response.cache_control.public = True
+    return response
+
 
 def get_speaker_status(speaker_name):
     status = {
@@ -210,10 +239,10 @@ def get_speaker_status(speaker_name):
 
 @app.route("/")
 def index():
-    speakers = get_all_speaker_names()
+    speakers = get_cached_speakers()
     speaker_statuses = []
     for name in speakers:
-        status = get_speaker_status(name)
+        status = get_cached_speaker_status(name)
         speaker_statuses.append(status)
 
     st_info = _get_sleep_timer_info(speaker_statuses)
@@ -490,6 +519,17 @@ def api_rediscover():
     rescan_speakers(timeout=2.0)
     speakers = get_all_speaker_names()
     return jsonify({"speakers": speakers})
+
+
+@app.route("/api/poll", methods=["GET"])
+def api_poll():
+    speakers = get_cached_speakers()
+    statuses = []
+    for name in speakers:
+        status = get_cached_speaker_status(name)
+        statuses.append(status)
+    st_info = _get_sleep_timer_info(statuses)
+    return jsonify({"speakers": statuses, "sleep_timer": st_info})
 
 
 # Radio Stations API
