@@ -152,6 +152,7 @@ def get_cached_speaker_status(name, timeout=5):
         return _speaker_cache["statuses"][name]
     status = get_speaker_status(name)
     _speaker_cache["statuses"][name] = status
+    _speaker_cache["timestamp"] = now
     return status
 
 
