@@ -177,10 +177,6 @@ function updateSleepTimerFromPoll(stInfo) {
 }
 
 function updateRadioFromPoll(d) {
-    var radioCount = document.querySelector('.radio-station-count');
-    if (radioCount && d.speakers) {
-        radioCount.textContent = d.speakers.length;
-    }
 }
 
 function refreshPagePartial(callback) {
