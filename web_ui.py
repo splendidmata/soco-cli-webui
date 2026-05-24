@@ -146,13 +146,13 @@ def get_cached_speakers(timeout=5):
     _speaker_cache["statuses"] = {}
     return speakers
 
-def get_cached_speaker_status(name, timeout=5):
+def get_cached_speaker_status(name, timeout=2):
     now = time.time()
-    if name in _speaker_cache["statuses"] and now - _speaker_cache["timestamp"] < timeout:
-        return _speaker_cache["statuses"][name]
+    entry = _speaker_cache["statuses"].get(name)
+    if entry and now - entry["timestamp"] < timeout:
+        return entry["data"]
     status = get_speaker_status(name)
-    _speaker_cache["statuses"][name] = status
-    _speaker_cache["timestamp"] = now
+    _speaker_cache["statuses"][name] = {"timestamp": now, "data": status}
     return status
 
 
@@ -214,15 +214,18 @@ def get_speaker_status(speaker_name):
 
     try:
         transport = speaker.get_current_transport_info()
-        status["state"] = transport.get("current_transport_state", "UNKNOWN")
+        raw_state = transport.get("current_transport_state", "UNKNOWN")
+        if raw_state == "PAUSED_PLAYBACK":
+            raw_state = "PAUSED"
+        status["state"] = raw_state
     except Exception as e:
         logger.warning(f"Could not get transport state for {speaker_name}: {e}")
 
     try:
         track_info = speaker.get_current_track_info()
-        status["track"] = track_info.get("title", "Unknown Track")
-        status["artist"] = track_info.get("artist", "Unknown Artist")
-        status["album"] = track_info.get("album", "Unknown Album")
+        status["track"] = track_info.get("title", "")
+        status["artist"] = track_info.get("artist", "")
+        status["album"] = track_info.get("album", "")
         status["album_art"] = track_info.get("album_art_uri", "")
     except Exception as e:
         logger.warning(f"Could not get track info for {speaker_name}: {e}")
@@ -527,7 +530,11 @@ def api_poll():
     speakers = get_cached_speakers()
     statuses = []
     for name in speakers:
-        status = get_cached_speaker_status(name)
+        entry = _speaker_cache["statuses"].get(name)
+        if entry and entry["data"].get("state") == "TRANSITIONING":
+            status = get_cached_speaker_status(name, timeout=0.5)
+        else:
+            status = get_cached_speaker_status(name)
         statuses.append(status)
     st_info = _get_sleep_timer_info(statuses)
     return jsonify({"speakers": statuses, "sleep_timer": st_info})

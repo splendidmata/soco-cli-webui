@@ -16,13 +16,13 @@
         :root { --bg-primary: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); --bg-card: linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%); --text-primary: #fff; --text-secondary: rgba(255,255,255,0.6); --accent: #00d4ff; --border-color: rgba(255,255,255,0.08); --bottom-player-bg: linear-gradient(180deg, rgba(26, 26, 46, 0.96) 0%, rgba(22, 33, 62, 0.99) 100%); --input-bg: rgba(255,255,255,0.1); }
         .light-theme { --bg-primary: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%); --bg-card: linear-gradient(145deg, #ffffff 0%, #f0f2f5 100%); --text-primary: #1a1a2e; --text-secondary: #4a5568; --accent: #0099cc; --border-color: rgba(0,0,0,0.08); --bottom-player-bg: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(245,247,250,0.99) 100%); --input-bg: rgba(0,0,0,0.05); }
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; background: var(--bg-primary); min-height: 100vh; color: var(--text-primary); padding: 16px; padding-bottom: 100px; transition: background 0.3s ease, color 0.3s ease; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif; background: var(--bg-primary); min-height: 100vh; color: var(--text-primary); padding: 16px; padding-bottom: 100px; padding-top: calc(16px + env(safe-area-inset-top)); padding-right: calc(16px + env(safe-area-inset-right)); padding-left: calc(16px + env(safe-area-inset-left)); transition: background 0.3s ease, color 0.3s ease; }
         .container { max-width: 1400px; margin: 0 auto; }
         header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); margin-bottom: 24px; }
         h1 { font-size: 1.5rem; font-weight: 600; color: var(--accent); }
         .bottom-player { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bottom-player-bg); backdrop-filter: blur(20px); border-top: 1px solid var(--border-color); padding: 12px 16px; z-index: 1000; transition: background 0.3s ease; }
         .speaker-card { background: var(--bg-card); border-radius: 16px; padding: 20px; border: 1px solid var(--border-color); transition: all 0.3s ease; }
-        @media (max-width: 767px) { body { padding: 8px; padding-bottom: 90px; } .bottom-player { padding: 8px 10px; } }
+        @media (max-width: 767px) { body { padding: 8px; padding-top: calc(8px + env(safe-area-inset-top)); padding-right: calc(8px + env(safe-area-inset-right)); padding-bottom: calc(90px + env(safe-area-inset-bottom)); padding-left: calc(8px + env(safe-area-inset-left)); } .bottom-player { padding: 8px 10px; padding-bottom: calc(8px + env(safe-area-inset-bottom)); } }
     </style>
     <link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"></noscript>
@@ -69,6 +69,18 @@
                             <div class="detail-label">IP 地址</div>
                             <div class="detail-value">{{ speaker.ip|default('未知') }}</div>
                         </div>
+                    </div>
+                    <div class="speaker-actions">
+                        <button class="card-action-btn card-mute-btn"
+                                onclick="cardToggleMute('{{ speaker.name }}')"
+                                title="静音">
+                            {% if speaker.mute %}🔇{% else %}🔊{% endif %}
+                        </button>
+                        <button class="card-action-btn card-play-btn"
+                                onclick="cardTogglePlay('{{ speaker.name }}')"
+                                title="播放/暂停">
+                            {% if speaker.state == 'PLAYING' %}❚❚{% else %}▶{% endif %}
+                        </button>
                     </div>
                 </div>
                 {% endfor %}
@@ -144,6 +156,10 @@
         {% set muted = sp0.get('mute', False) %}
         {% set crossfade_on = sp0.get('cross_fade', False) %}
         <div class="player-content">
+            <div class="player-current-zone">
+                <span class="current-zone-label">已选择：</span>
+                <span class="current-zone-name" id="currentZoneLabel">{{ sp0.name|default('未选择') }}</span>
+            </div>
             <div class="player-track-info" id="playerTrackInfo">
                 {% if sp0.get('track') %}
                 <div class="player-title">{{ sp0.track }}</div>
@@ -195,7 +211,7 @@
                     </button>
                     <button class="player-volume-btn {% if muted %}disabled{% endif %}" id="volumeDownBtn" onclick="adjustVolume(-1)" title="音量减" {% if muted %}disabled{% endif %}>-</button>
                     <div class="player-volume-slider-container">
-                        <input type="range" class="player-volume-slider {% if muted %}disabled{% endif %}" id="mainVolume" min="0" max="100" step="1" value="{{ sp0.volume|default(50) }}" onchange="setVolume(this.value)" {% if muted %}disabled{% endif %}>
+                        <input type="range" class="player-volume-slider {% if muted %}disabled{% endif %}" id="mainVolume" min="0" max="100" step="1" value="{{ sp0.volume|default(50) }}" oninput="onVolumeSlide(this.value)" {% if muted %}disabled{% endif %}>
                     </div>
                     <button class="player-volume-btn {% if muted %}disabled{% endif %}" id="volumeUpBtn" onclick="adjustVolume(1)" title="音量加" {% if muted %}disabled{% endif %}>+</button>
                     <span class="player-volume-value" id="volumeValue">{% if muted %}静音{% else %}{{ sp0.volume|default(50) }}%{% endif %}</span>

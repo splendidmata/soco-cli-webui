@@ -32,7 +32,6 @@ function showNotification(msg) {
 }
 
 function pollState() {
-    if (apiPending) return;
     fetch('/api/poll')
     .then(function(r) { return r.json(); })
     .then(function(d) {
@@ -55,35 +54,50 @@ function updateCardsFromPoll(speakers) {
         if (card) {
             var stateEl = card.querySelector('.speaker-state');
             if (stateEl && sp.state) {
+                var stateUpper = sp.state.toUpperCase();
                 var newClass = 'speaker-state state-' + sp.state.toLowerCase();
                 if (stateEl.className !== newClass) stateEl.className = newClass;
-            }
-            var stateText = card.querySelector('.state-text');
-            if (stateText) {
                 var labelMap = { 'PLAYING': '播放中', 'PAUSED': '已暂停', 'STOPPED': '已停止', 'TRANSITIONING': '切换中' };
-                var label = labelMap[sp.state] || '未知';
-                if (stateText.textContent !== label) stateText.textContent = label;
+                var iconMap = { 'PLAYING': '▶', 'PAUSED': '❚❚', 'STOPPED': '■', 'TRANSITIONING': '↻' };
+                var label = labelMap[stateUpper] || '未知';
+                var icon = iconMap[stateUpper] || '?';
+                var iconEl = stateEl.querySelector('.state-icon');
+                if (iconEl && iconEl.textContent !== icon) iconEl.textContent = icon;
+                if (stateEl.lastChild && stateEl.lastChild.nodeType === 3) {
+                    if (stateEl.lastChild.nodeValue.trim() !== label) {
+                        stateEl.lastChild.nodeValue = ' ' + label;
+                    }
+                }
             }
             var trackInfo = card.querySelector('.track-info');
             if (trackInfo) {
                 var titleEl = trackInfo.querySelector('.track-title');
                 var artistEl = trackInfo.querySelector('.track-artist');
-                if (titleEl && sp.track && titleEl.textContent !== sp.track) {
+                if (titleEl && sp.track !== undefined && titleEl.textContent !== sp.track) {
                     titleEl.textContent = sp.track;
                 }
-                if (artistEl) {
+                if (artistEl && sp.artist !== undefined) {
                     var newArtist = sp.artist || '';
                     if (artistEl.textContent !== newArtist) artistEl.textContent = newArtist;
                 }
             }
             var details = card.querySelector('.speaker-details');
-            if (details && sp.volume !== undefined) {
+            if (details && sp.volume !== undefined && !(volumeChanging && sp.name === currentZone)) {
                 var detailValues = details.querySelectorAll('.detail-value');
                 if (detailValues.length >= 1) {
-                    if (sp.volume !== null && detailValues[0].textContent !== String(sp.volume)) {
-                        detailValues[0].textContent = sp.volume + '%';
-                    }
+                    var volText = sp.mute ? '静音' : (sp.volume != null ? sp.volume : 0) + '%';
+                    if (detailValues[0].textContent !== volText) detailValues[0].textContent = volText;
                 }
+            }
+            var playBtn = card.querySelector('.card-play-btn');
+            if (playBtn && sp.state) {
+                var btnText = sp.state === 'PLAYING' ? '❚❚' : sp.state === 'TRANSITIONING' ? '~' : '▶';
+                if (playBtn.textContent !== btnText) playBtn.textContent = btnText;
+            }
+            var muteBtn = card.querySelector('.card-mute-btn');
+            if (muteBtn && sp.mute !== undefined) {
+                var muteText = sp.mute ? '🔇' : '🔊';
+                if (muteBtn.textContent !== muteText) muteBtn.textContent = muteText;
             }
         }
     });
@@ -92,26 +106,32 @@ function updateCardsFromPoll(speakers) {
             cardMap[name].parentNode.removeChild(cardMap[name]);
         }
     });
+    checkTransitioningAndRefresh();
 }
 
 function updatePlayerFromPoll(speakers) {
-    var sp0 = speakers[0];
+    var sp0 = null;
+    if (currentZone) {
+        for (var i = 0; i < speakers.length; i++) {
+            if (speakers[i].name === currentZone) {
+                sp0 = speakers[i];
+                break;
+            }
+        }
+    }
+    if (!sp0) sp0 = speakers[0];
     if (!sp0) return;
     var trackInfo = document.getElementById('playerTrackInfo');
     if (trackInfo) {
         var titleEl = trackInfo.querySelector('.player-title');
         var artistEl = trackInfo.querySelector('.player-artist');
-        if (titleEl && sp0.track) {
-            if (titleEl.textContent !== sp0.track) {
-                titleEl.classList.add('switching');
-                setTimeout(function() { titleEl.textContent = sp0.track; titleEl.classList.remove('switching'); }, 200);
-            }
+        if (titleEl && sp0.track && titleEl.textContent !== sp0.track) {
+            titleEl.textContent = sp0.track;
         }
-        if (artistEl) {
+        if (artistEl && sp0.artist !== undefined) {
             var newArtist = sp0.artist || '暂无播放内容';
             if (artistEl.textContent !== newArtist) {
-                artistEl.classList.add('switching');
-                setTimeout(function() { artistEl.textContent = newArtist; artistEl.classList.remove('switching'); }, 200);
+                artistEl.textContent = newArtist;
             }
         }
     }
@@ -120,7 +140,8 @@ function updatePlayerFromPoll(speakers) {
         var btnText = sp0.state === 'PLAYING' ? '❚❚' : sp0.state === 'TRANSITIONING' ? '~' : '▶';
         if (playBtn.textContent !== btnText) {
             playBtn.style.transform = 'scale(0.8)';
-            setTimeout(function() { playBtn.textContent = btnText; playBtn.style.transform = 'scale(1)'; }, 100);
+            playBtn.textContent = btnText;
+            requestAnimationFrame(function() { playBtn.style.transform = 'scale(1)'; });
         }
     }
     var muteBtn = document.getElementById('mainMuteBtn');
@@ -137,7 +158,7 @@ function updatePlayerFromPoll(speakers) {
     }
     var volumeValue = document.getElementById('volumeValue');
     if (volumeValue && !volumeChanging) {
-        volumeValue.textContent = isMuted ? '静音' : (sp0.volume || 50) + '%';
+        volumeValue.textContent = isMuted ? '静音' : (sp0.volume != null ? sp0.volume : 50) + '%';
     }
     ['volumeDownBtn', 'volumeUpBtn'].forEach(function(id) {
         var el = document.getElementById(id);
@@ -152,10 +173,16 @@ function updatePlayerFromPoll(speakers) {
         zoneSelect.value = sp0.name || '';
         currentZone = sp0.name;
     }
+
+    var zoneLabel = document.getElementById('currentZoneLabel');
+    if (zoneLabel && sp0.name) {
+        zoneLabel.textContent = sp0.name;
+    }
 }
 
 function updateSleepTimerFromPoll(stInfo) {
     if (!stInfo) return;
+    if (sleepPendingFlag) return;
     if (stInfo.active && stInfo.seconds > 0) {
         if (sleepTimerServerSeconds === null || Math.abs(stInfo.seconds - sleepTimerServerSeconds) > 3) {
             displaySleepTimer(stInfo.seconds);
