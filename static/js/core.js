@@ -79,13 +79,9 @@ function updateCardsFromPoll(speakers) {
             var details = card.querySelector('.speaker-details');
             if (details && sp.volume !== undefined) {
                 var detailValues = details.querySelectorAll('.detail-value');
-                if (detailValues.length >= 2) {
+                if (detailValues.length >= 1) {
                     if (sp.volume !== null && detailValues[0].textContent !== String(sp.volume)) {
-                        detailValues[0].textContent = sp.volume;
-                    }
-                    var muteText = sp.mute ? '是' : '否';
-                    if (sp.mute !== undefined && detailValues[1].textContent !== muteText) {
-                        detailValues[1].textContent = muteText;
+                        detailValues[0].textContent = sp.volume + '%';
                     }
                 }
             }
